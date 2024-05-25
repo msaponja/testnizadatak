@@ -1,0 +1,2792 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vulnerabilityAssessments_Default_storageContainerPath": {
+            "type": "SecureString"
+        },
+        "sites_webapp_syskit_test_italynorth_1_name": {
+            "defaultValue": "webapp-syskit-test-italynorth-1",
+            "type": "String"
+        },
+        "sites_webapp_syskit_test_italynorth_2_name": {
+            "defaultValue": "webapp-syskit-test-italynorth-2",
+            "type": "String"
+        },
+        "sites_webapp_syskit_test_italynorth_3_name": {
+            "defaultValue": "webapp-syskit-test-italynorth-3",
+            "type": "String"
+        },
+        "sites_webapp_syskit_test_italynorth_4_name": {
+            "defaultValue": "webapp-syskit-test-italynorth-4",
+            "type": "String"
+        },
+        "servers_sqlserver_syskit_test_italynorth_1_name": {
+            "defaultValue": "sqlserver-syskit-test-italynorth-1",
+            "type": "String"
+        },
+        "serverfarms_ASP_rgsyskittestitalynorth_bbda_name": {
+            "defaultValue": "ASP-rgsyskittestitalynorth-bbda",
+            "type": "String"
+        },
+        "virtualNetworks_vn_syskit_test_italynorth_name": {
+            "defaultValue": "vn-syskit-test-italynorth",
+            "type": "String"
+        },
+        "privateEndpoints_pe_syskit_test_italynorth_name": {
+            "defaultValue": "pe-syskit-test-italynorth",
+            "type": "String"
+        },
+        "privateDnsZones_privatelink_database_windows_net_name": {
+            "defaultValue": "privatelink.database.windows.net",
+            "type": "String"
+        },
+        "templateSpecs_arm_sql_syskit_test_italynorth_v1_name": {
+            "defaultValue": "arm-sql-syskit-test-italynorth-v1",
+            "type": "String"
+        },
+        "templateSpecs_arm_web_syskit_test_italynorth_v1_name": {
+            "defaultValue": "arm-web-syskit-test-italynorth-v1",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Network/privateDnsZones",
+            "apiVersion": "2020-06-01",
+            "name": "[parameters('privateDnsZones_privatelink_database_windows_net_name')]",
+            "location": "global",
+            "properties": {}
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2023-11-01",
+            "name": "[parameters('virtualNetworks_vn_syskit_test_italynorth_name')]",
+            "location": "italynorth",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.0.0.0/24"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "default",
+                        "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vn_syskit_test_italynorth_name'), 'default')]",
+                        "properties": {
+                            "addressPrefix": "10.0.0.0/24",
+                            "serviceEndpoints": [
+                                {
+                                    "service": "Microsoft.Sql",
+                                    "locations": [
+                                        "italynorth"
+                                    ]
+                                }
+                            ],
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Disabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        },
+                        "type": "Microsoft.Network/virtualNetworks/subnets"
+                    }
+                ],
+                "virtualNetworkPeerings": [],
+                "enableDdosProtection": false
+            }
+        },
+        {
+            "type": "Microsoft.Resources/templateSpecs",
+            "apiVersion": "2022-02-01",
+            "name": "[parameters('templateSpecs_arm_sql_syskit_test_italynorth_v1_name')]",
+            "location": "italynorth",
+            "properties": {
+                "description": "SQL_DB&SQL_VM automation script."
+            }
+        },
+        {
+            "type": "Microsoft.Resources/templateSpecs",
+            "apiVersion": "2022-02-01",
+            "name": "[parameters('templateSpecs_arm_web_syskit_test_italynorth_v1_name')]",
+            "location": "italynorth",
+            "properties": {
+                "description": "Webapp deployment."
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[parameters('servers_sqlserver_syskit_test_italynorth_1_name')]",
+            "location": "italynorth",
+            "kind": "v12.0",
+            "properties": {
+                "administratorLogin": "CloudSA1cc6114d",
+                "version": "12.0",
+                "minimalTlsVersion": "1.2",
+                "publicNetworkAccess": "Enabled",
+                "administrators": {
+                    "administratorType": "ActiveDirectory",
+                    "principalType": "Group",
+                    "login": "msaponja@markosaponjagmail.onmicrosoft.com",
+                    "sid": "cdc63399-e259-4ec3-a065-a905f572f18e",
+                    "tenantId": "4b2b0238-7a76-439b-bc3e-079b8c455cfe",
+                    "azureADOnlyAuthentication": false
+                },
+                "restrictOutboundNetworkAccess": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2023-12-01",
+            "name": "[parameters('serverfarms_ASP_rgsyskittestitalynorth_bbda_name')]",
+            "location": "Italy North",
+            "sku": {
+                "name": "F1",
+                "tier": "Free",
+                "size": "F1",
+                "family": "F",
+                "capacity": 1
+            },
+            "kind": "linux",
+            "properties": {
+                "perSiteScaling": false,
+                "elasticScaleEnabled": false,
+                "maximumElasticWorkerCount": 1,
+                "isSpot": false,
+                "reserved": true,
+                "isXenon": false,
+                "hyperV": false,
+                "targetWorkerCount": 0,
+                "targetWorkerSizeId": 0,
+                "zoneRedundant": false
+            }
+        },
+        {
+            "type": "Microsoft.Network/privateDnsZones/A",
+            "apiVersion": "2020-06-01",
+            "name": "[concat(parameters('privateDnsZones_privatelink_database_windows_net_name'), '/sqlserver-syskit-test-italynorth-1')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/privateDnsZones', parameters('privateDnsZones_privatelink_database_windows_net_name'))]"
+            ],
+            "properties": {
+                "metadata": {
+                    "creator": "created by private endpoint pe-syskit-test-italynorth with resource guid 257d5722-ff2f-41b0-9f2e-fc30e1d35dc8"
+                },
+                "ttl": 10,
+                "aRecords": [
+                    {
+                        "ipv4Address": "10.0.0.4"
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/privateDnsZones/SOA",
+            "apiVersion": "2020-06-01",
+            "name": "[concat(parameters('privateDnsZones_privatelink_database_windows_net_name'), '/@')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/privateDnsZones', parameters('privateDnsZones_privatelink_database_windows_net_name'))]"
+            ],
+            "properties": {
+                "ttl": 3600,
+                "soaRecord": {
+                    "email": "azureprivatedns-host.microsoft.com",
+                    "expireTime": 2419200,
+                    "host": "azureprivatedns.net",
+                    "minimumTtl": 10,
+                    "refreshTime": 3600,
+                    "retryTime": 300,
+                    "serialNumber": 1
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('virtualNetworks_vn_syskit_test_italynorth_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_vn_syskit_test_italynorth_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "10.0.0.0/24",
+                "serviceEndpoints": [
+                    {
+                        "service": "Microsoft.Sql",
+                        "locations": [
+                            "italynorth"
+                        ]
+                    }
+                ],
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Disabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Resources/templateSpecs/versions",
+            "apiVersion": "2022-02-01",
+            "name": "[concat(parameters('templateSpecs_arm_sql_syskit_test_italynorth_v1_name'), '/1.0')]",
+            "location": "italynorth",
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/templateSpecs', parameters('templateSpecs_arm_sql_syskit_test_italynorth_v1_name'))]"
+            ],
+            "properties": {
+                "mainTemplate": {
+                    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "administratorLogin": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "administratorLoginPassword": {
+                            "type": "securestring",
+                            "defaultValue": ""
+                        },
+                        "administrators": {
+                            "type": "object",
+                            "defaultValue": {}
+                        },
+                        "collation": {
+                            "type": "string"
+                        },
+                        "databaseName": {
+                            "type": "string"
+                        },
+                        "tier": {
+                            "type": "string"
+                        },
+                        "skuName": {
+                            "type": "string"
+                        },
+                        "location": {
+                            "type": "string"
+                        },
+                        "maxSizeBytes": {
+                            "type": "int"
+                        },
+                        "serverName": {
+                            "type": "string"
+                        },
+                        "sampleName": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "zoneRedundant": {
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        "licenseType": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "readScaleOut": {
+                            "type": "string",
+                            "defaultValue": "Disabled"
+                        },
+                        "numberOfReplicas": {
+                            "type": "int",
+                            "defaultValue": 0
+                        },
+                        "minCapacity": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "autoPauseDelay": {
+                            "type": "int",
+                            "defaultValue": 0
+                        },
+                        "enableADS": {
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        "allowAzureIps": {
+                            "type": "bool",
+                            "defaultValue": true
+                        },
+                        "databaseTags": {
+                            "type": "object",
+                            "defaultValue": {}
+                        },
+                        "serverTags": {
+                            "type": "object",
+                            "defaultValue": {}
+                        },
+                        "enableVA": {
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        "useVAManagedIdentity": {
+                            "type": "bool",
+                            "defaultValue": false,
+                            "metadata": {
+                                "description": "To enable vulnerability assessments, the user deploying this template must have an administrator or owner permissions."
+                            }
+                        },
+                        "vaStoragelessEnabled": {
+                            "type": "bool",
+                            "defaultValue": false,
+                            "metadata": {
+                                "description": "Flag for enabling vulnerability assessments with express configuration (storage less), the user deploying this template must have administrator or owner permissions."
+                            }
+                        },
+                        "enablePrivateEndpoint": {
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        "privateEndpointNestedTemplateId": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "privateEndpointSubscriptionId": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "privateEndpointResourceGroup": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "privateEndpointName": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "privateEndpointLocation": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "privateEndpointSubnetId": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "privateLinkServiceName": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "privateLinkServiceServiceId": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "privateEndpointVnetSubscriptionId": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "privateEndpointVnetResourceGroup": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "privateEndpointVnetName": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "privateEndpointSubnetName": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "enablePrivateDnsZone": {
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        "privateLinkPrivateDnsZoneFQDN": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "privateLinkPrivateDnsZoneRG": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "privateEndpointDnsRecordUniqueId": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "privateEndpointTemplateLink": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "privateDnsForPrivateEndpointTemplateLink": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "privateDnsForPrivateEndpointNicTemplateLink": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "privateDnsForPrivateEndpointIpConfigTemplateLink": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "allowClientIp": {
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        "clientIpRuleName": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "clientIpValue": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "publicNetworkAccess": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "requestedBackupStorageRedundancy": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "maintenanceConfigurationId": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "keyId": {
+                            "type": "string",
+                            "defaultValue": "",
+                            "metadata": {
+                                "description": "Uri of the encryption key."
+                            }
+                        },
+                        "identity": {
+                            "type": "object",
+                            "defaultValue": {},
+                            "metadata": {
+                                "description": "Microsoft Entra ID of the server."
+                            }
+                        },
+                        "primaryUserAssignedIdentityId": {
+                            "type": "string",
+                            "defaultValue": "",
+                            "metadata": {
+                                "description": "resource id of a user assigned identity to be used by default."
+                            }
+                        },
+                        "minimalTlsVersion": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "enableSqlLedger": {
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        "connectionType": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "enableDigestStorage": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "digestStorageOption": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "digestStorageName": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "blobStorageContainerName": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "retentionDays": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "retentionPolicy": {
+                            "type": "bool",
+                            "defaultValue": true
+                        },
+                        "digestAccountResourceGroup": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "digestRegion": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "storageAccountdigestRegion": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "isNewDigestLocation": {
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        "isPermissionAssigned": {
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        "sqlLedgerTemplateLink": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "availabilityZone": {
+                            "type": "string",
+                            "defaultValue": "NoPreference"
+                        },
+                        "useFreeLimit": {
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        "freeLimitExhaustionBehavior": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "federatedClientId": {
+                            "type": "string",
+                            "defaultValue": ""
+                        },
+                        "servicePrincipal": {
+                            "type": "object",
+                            "defaultValue": {}
+                        }
+                    },
+                    "resources": [
+                        {
+                            "condition": "[[parameters('enableVA')]",
+                            "type": "Microsoft.Storage/storageAccounts",
+                            "apiVersion": "2019-04-01",
+                            "name": "[[variables('storageName')]",
+                            "location": "[[parameters('location')]",
+                            "sku": {
+                                "name": "Standard_LRS"
+                            },
+                            "kind": "StorageV2",
+                            "properties": {
+                                "minimumTlsVersion": "TLS1_2",
+                                "supportsHttpsTrafficOnly": "true",
+                                "allowBlobPublicAccess": "false"
+                            },
+                            "resources": [
+                                {
+                                    "condition": "[[parameters('useVAManagedIdentity')]",
+                                    "type": "Microsoft.Storage/storageAccounts/providers/roleAssignments",
+                                    "apiVersion": "2018-09-01-preview",
+                                    "name": "[[concat(variables('storageName'), '/Microsoft.Authorization/', variables('uniqueRoleGuid') )]",
+                                    "dependsOn": [
+                                        "[[resourceId('Microsoft.Sql/servers', parameters('serverName'))]",
+                                        "[[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]"
+                                    ],
+                                    "properties": {
+                                        "roleDefinitionId": "[[variables('StorageBlobContributor')]",
+                                        "principalId": "[[reference(resourceId('Microsoft.Sql/servers', parameters('serverName')), '2018-06-01-preview', 'Full').identity.principalId]",
+                                        "scope": "[[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]",
+                                        "principalType": "ServicePrincipal"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "apiVersion": "2021-05-01-preview",
+                            "type": "Microsoft.Sql/servers",
+                            "location": "[[parameters('location')]",
+                            "tags": "[[parameters('serverTags')]",
+                            "name": "[[parameters('serverName')]",
+                            "properties": {
+                                "version": "12.0",
+                                "minimalTlsVersion": "[[parameters('minimalTlsVersion')]",
+                                "publicNetworkAccess": "[[parameters('publicNetworkAccess')]",
+                                "administrators": "[[parameters('administrators')]",
+                                "primaryUserAssignedIdentityId": "[[parameters('primaryUserAssignedIdentityId')]",
+                                "federatedClientId": "[[parameters('federatedClientId')]",
+                                "servicePrincipal": "[[parameters('servicePrincipal')]"
+                            },
+                            "resources": [
+                                {
+                                    "apiVersion": "2022-08-01-preview",
+                                    "dependsOn": [
+                                        "[[concat('Microsoft.Sql/servers/', parameters('serverName'))]"
+                                    ],
+                                    "location": "[[parameters('location')]",
+                                    "tags": "[[parameters('databaseTags')]",
+                                    "name": "[[parameters('databaseName')]",
+                                    "properties": {
+                                        "collation": "[[parameters('collation')]",
+                                        "maxSizeBytes": "[[parameters('maxSizeBytes')]",
+                                        "sampleName": "[[parameters('sampleName')]",
+                                        "zoneRedundant": "[[parameters('zoneRedundant')]",
+                                        "licenseType": "[[parameters('licenseType')]",
+                                        "readScale": "[[parameters('readScaleOut')]",
+                                        "highAvailabilityReplicaCount": "[[parameters('numberOfReplicas')]",
+                                        "minCapacity": "[[parameters('minCapacity')]",
+                                        "autoPauseDelay": "[[parameters('autoPauseDelay')]",
+                                        "requestedBackupStorageRedundancy": "[[parameters('requestedBackupStorageRedundancy')]",
+                                        "isLedgerOn": "[[parameters('enableSqlLedger')]",
+                                        "availabilityZone": "[[parameters('availabilityZone')]",
+                                        "useFreeLimit": "[[parameters('useFreeLimit')]",
+                                        "freeLimitExhaustionBehavior": "[[parameters('freeLimitExhaustionBehavior')]"
+                                    },
+                                    "sku": {
+                                        "name": "[[parameters('skuName')]",
+                                        "tier": "[[parameters('tier')]"
+                                    },
+                                    "type": "databases"
+                                },
+                                {
+                                    "condition": "[[parameters('allowAzureIps')]",
+                                    "apiVersion": "2021-11-01",
+                                    "dependsOn": [
+                                        "[[concat('Microsoft.Sql/servers/', parameters('serverName'))]"
+                                    ],
+                                    "location": "[[parameters('location')]",
+                                    "name": "AllowAllWindowsAzureIps",
+                                    "properties": {
+                                        "endIpAddress": "0.0.0.0",
+                                        "startIpAddress": "0.0.0.0"
+                                    },
+                                    "type": "firewallrules"
+                                },
+                                {
+                                    "apiVersion": "2014-04-01",
+                                    "dependsOn": [
+                                        "[[concat('Microsoft.Sql/servers/', parameters('serverName'))]"
+                                    ],
+                                    "location": "[[parameters('location')]",
+                                    "name": "Default",
+                                    "properties": {
+                                        "connectionType": "[[parameters('connectionType')]"
+                                    },
+                                    "type": "connectionPolicies"
+                                },
+                                {
+                                    "condition": "[[parameters('allowClientIp')]",
+                                    "apiVersion": "2021-11-01",
+                                    "dependsOn": [
+                                        "[[concat('Microsoft.Sql/servers/', parameters('serverName'))]"
+                                    ],
+                                    "location": "[[parameters('location')]",
+                                    "name": "[[parameters('clientIpRuleName')]",
+                                    "properties": {
+                                        "endIpAddress": "[[parameters('clientIpValue')]",
+                                        "startIpAddress": "[[parameters('clientIpValue')]"
+                                    },
+                                    "type": "firewallrules"
+                                },
+                                {
+                                    "condition": "[[parameters('enableADS')]",
+                                    "apiVersion": "2021-11-01-preview",
+                                    "type": "advancedThreatProtectionSettings",
+                                    "name": "Default",
+                                    "dependsOn": [
+                                        "[[concat('Microsoft.Sql/servers/', parameters('serverName'))]",
+                                        "[[concat('Microsoft.Sql/servers/', parameters('serverName'), '/databases/', parameters('databaseName'))]"
+                                    ],
+                                    "properties": {
+                                        "state": "Enabled"
+                                    }
+                                },
+                                {
+                                    "condition": "[[parameters('enableVA')]",
+                                    "apiVersion": "2018-06-01-preview",
+                                    "type": "vulnerabilityAssessments",
+                                    "name": "Default",
+                                    "properties": {
+                                        "storageContainerPath": "[[if(parameters('enableVA'), concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))).primaryEndpoints.blob, 'vulnerability-assessment'), '')]",
+                                        "storageAccountAccessKey": "[[if(and(parameters('enableVA'),not(parameters('useVAManagedIdentity'))), listKeys(variables('storageName'), '2018-02-01').keys[0].value, '')]",
+                                        "recurringScans": {
+                                            "isEnabled": true,
+                                            "emailSubscriptionAdmins": false,
+                                            "emails": []
+                                        }
+                                    },
+                                    "dependsOn": [
+                                        "[[concat('Microsoft.Sql/servers/', parameters('serverName'))]",
+                                        "[[concat('Microsoft.Storage/storageAccounts/', variables('storageName'))]",
+                                        "[[concat('Microsoft.Sql/servers/', parameters('serverName'), '/advancedThreatProtectionSettings/Default')]"
+                                    ]
+                                },
+                                {
+                                    "condition": "[[parameters('vaStoragelessEnabled')]",
+                                    "type": "sqlVulnerabilityAssessments",
+                                    "apiVersion": "2022-02-01-preview",
+                                    "name": "Default",
+                                    "dependsOn": [
+                                        "[[resourceId('Microsoft.Sql/servers', parameters('serverName'))]"
+                                    ],
+                                    "properties": {
+                                        "state": "Enabled"
+                                    }
+                                }
+                            ],
+                            "identity": "[[parameters('identity')]"
+                        },
+                        {
+                            "condition": "[[parameters('enablePrivateEndpoint')]",
+                            "type": "Microsoft.Resources/deployments",
+                            "apiVersion": "[[variables('deploymentTemplateApi')]",
+                            "name": "[[variables('subnetPoliciesTemplateName')]",
+                            "properties": {
+                                "mode": "Incremental",
+                                "template": {
+                                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                                    "contentVersion": "1.0.0.0",
+                                    "resources": [
+                                        {
+                                            "apiVersion": "[[variables('privateEndpointApi')]",
+                                            "name": "[[concat(parameters('privateEndpointVnetName'), '/', parameters('privateEndpointSubnetName'))]",
+                                            "location": "[[parameters('privateEndpointLocation')]",
+                                            "properties": {
+                                                "privateEndpointNetworkPolicies": "Disabled"
+                                            },
+                                            "type": "Microsoft.Network/virtualNetworks/subnets"
+                                        }
+                                    ]
+                                }
+                            },
+                            "subscriptionId": "[[if(parameters('enablePrivateEndpoint'), parameters('privateEndpointVnetSubscriptionId'), variables('subscriptionId'))]",
+                            "resourceGroup": "[[if(parameters('enablePrivateEndpoint'), parameters('privateEndpointVnetResourceGroup'), variables('resourceGroupName'))]"
+                        },
+                        {
+                            "condition": "[[parameters('enablePrivateEndpoint')]",
+                            "type": "Microsoft.Resources/deployments",
+                            "apiVersion": "[[variables('deploymentTemplateApi')]",
+                            "name": "[[variables('privateEndpointTemplateName')]",
+                            "dependsOn": [
+                                "[[resourceId(variables('subscriptionId'), variables('resourceGroupName'), 'Microsoft.Sql/servers/databases/', parameters('serverName'), parameters('databaseName'))]",
+                                "[[variables('subnetPoliciesTemplateName')]"
+                            ],
+                            "properties": {
+                                "mode": "Incremental",
+                                "parameters": {
+                                    "privateEndpointName": {
+                                        "value": "[[parameters('privateEndpointName')]"
+                                    },
+                                    "privateEndpointConnectionId": {
+                                        "value": ""
+                                    },
+                                    "privateEndpointConnectionName": {
+                                        "value": "[[parameters('privateLinkServiceName')]"
+                                    },
+                                    "privateEndpointId": {
+                                        "value": "[[variables('privateEndpointId')]"
+                                    },
+                                    "privateEndpointApiVersion": {
+                                        "value": "[[variables('privateEndpointApi')]"
+                                    },
+                                    "privateLinkServiceId": {
+                                        "value": "[[parameters('privateLinkServiceServiceId')]"
+                                    },
+                                    "groupId": {
+                                        "value": "SqlServer"
+                                    },
+                                    "subnetId": {
+                                        "value": "[[variables('privateEndpointSubnetResourceId')]"
+                                    },
+                                    "location": {
+                                        "value": "[[parameters('privateEndpointLocation')]"
+                                    },
+                                    "tags": {
+                                        "value": {}
+                                    }
+                                },
+                                "templatelink": {
+                                    "contentVersion": "1.0.0.0",
+                                    "uri": "[[parameters('privateEndpointTemplateLink')]"
+                                }
+                            },
+                            "subscriptionId": "[[if(parameters('enablePrivateEndpoint'), parameters('privateEndpointSubscriptionId'), variables('subscriptionId'))]",
+                            "resourceGroup": "[[if(parameters('enablePrivateEndpoint'), parameters('privateEndpointResourceGroup'), variables('resourceGroupName'))]"
+                        },
+                        {
+                            "condition": "[[and(parameters('enablePrivateEndpoint'), parameters('enablePrivateDnsZone'))]",
+                            "type": "Microsoft.Resources/deployments",
+                            "apiVersion": "[[variables('deploymentTemplateApi')]",
+                            "name": "[[concat('PrivateDns-', parameters('privateEndpointNestedTemplateId'))]",
+                            "dependsOn": [
+                                "[[variables('privateEndpointTemplateName')]"
+                            ],
+                            "properties": {
+                                "mode": "Incremental",
+                                "template": {
+                                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                                    "contentVersion": "1.0.0.0",
+                                    "resources": [
+                                        {
+                                            "type": "Microsoft.Network/privateDnsZones",
+                                            "apiVersion": "2018-09-01",
+                                            "name": "[[parameters('privateLinkPrivateDnsZoneFQDN')]",
+                                            "location": "global",
+                                            "tags": {},
+                                            "properties": {}
+                                        },
+                                        {
+                                            "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+                                            "apiVersion": "2018-09-01",
+                                            "name": "[[concat(parameters('privateLinkPrivateDnsZoneFQDN'), '/', uniqueString(variables('privateEndpointVnetId')))]",
+                                            "location": "global",
+                                            "dependsOn": [
+                                                "[[parameters('privateLinkPrivateDnsZoneFQDN')]"
+                                            ],
+                                            "properties": {
+                                                "virtualNetwork": {
+                                                    "id": "[[variables('privateEndpointVnetId')]"
+                                                },
+                                                "registrationEnabled": false
+                                            }
+                                        },
+                                        {
+                                            "apiVersion": "[[variables('deploymentTemplateApi')]",
+                                            "name": "[[concat('EndpointDnsRecords-', parameters('privateEndpointDnsRecordUniqueId'))]",
+                                            "type": "Microsoft.Resources/deployments",
+                                            "dependsOn": [
+                                                "[[parameters('privateLinkPrivateDnsZoneFQDN')]"
+                                            ],
+                                            "properties": {
+                                                "mode": "Incremental",
+                                                "templatelink": {
+                                                    "contentVersion": "1.0.0.0",
+                                                    "uri": "[[parameters('privateDnsForPrivateEndpointTemplateLink')]"
+                                                },
+                                                "parameters": {
+                                                    "privateDnsName": {
+                                                        "value": "[[parameters('privateLinkPrivateDnsZoneFQDN')]"
+                                                    },
+                                                    "privateEndpointNicResourceId": {
+                                                        "value": "[[if(parameters('enablePrivateEndpoint'), reference(concat('Microsoft.Resources/deployments/', variables('privateEndpointTemplateName'))).outputs.networkInterfaceId.value, '')]"
+                                                    },
+                                                    "nicRecordsTemplateUri": {
+                                                        "value": "[[parameters('privateDnsForPrivateEndpointNicTemplateLink')]"
+                                                    },
+                                                    "ipConfigRecordsTemplateUri": {
+                                                        "value": "[[parameters('privateDnsForPrivateEndpointIpConfigTemplateLink')]"
+                                                    },
+                                                    "uniqueId": {
+                                                        "value": "[[parameters('privateEndpointDnsRecordUniqueId')]"
+                                                    },
+                                                    "existingRecords": {
+                                                        "value": {}
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            "subscriptionId": "[[if(parameters('enablePrivateEndpoint'), parameters('privateEndpointVnetSubscriptionId'), variables('subscriptionId'))]",
+                            "resourceGroup": "[[if(parameters('enablePrivateEndpoint'), parameters('privateLinkPrivateDnsZoneRG'), variables('resourceGroupName'))]"
+                        },
+                        {
+                            "condition": "[[equals(parameters('enableDigestStorage'), 'Enabled')]",
+                            "type": "Microsoft.Resources/deployments",
+                            "apiVersion": "2019-05-01",
+                            "name": "[[concat('ledger-', parameters('digestStorageName'))]",
+                            "dependsOn": [
+                                "[[resourceId('Microsoft.Sql/servers', parameters('serverName'))]",
+                                "[[concat('Microsoft.Sql/servers/', parameters('serverName'), '/databases/', parameters('databaseName'))]"
+                            ],
+                            "properties": {
+                                "mode": "Incremental",
+                                "parameters": {
+                                    "enableDigestStorage": {
+                                        "value": "[[parameters('enableDigestStorage')]"
+                                    },
+                                    "digestStorageOption": {
+                                        "value": "[[parameters('digestStorageOption')]"
+                                    },
+                                    "digestStorageName": {
+                                        "value": "[[parameters('digestStorageName')]"
+                                    },
+                                    "blobStorageContainerName": {
+                                        "value": "[[parameters('blobStorageContainerName')]"
+                                    },
+                                    "retentionDays": {
+                                        "value": "[[parameters('retentionDays')]"
+                                    },
+                                    "retentionPolicy": {
+                                        "value": "[[parameters('retentionPolicy')]"
+                                    },
+                                    "serverName": {
+                                        "value": "[[parameters('serverName')]"
+                                    },
+                                    "digestAccountResourceGroup": {
+                                        "value": "[[parameters('digestAccountResourceGroup')]"
+                                    },
+                                    "databaseName": {
+                                        "value": "[[parameters('databaseName')]"
+                                    },
+                                    "serverLocation": {
+                                        "value": "[[parameters('location')]"
+                                    },
+                                    "digestRegion": {
+                                        "value": "[[parameters('digestRegion')]"
+                                    },
+                                    "storageAccountdigestRegion": {
+                                        "value": "[[parameters('storageAccountdigestRegion')]"
+                                    },
+                                    "isNewDigestLocation": {
+                                        "value": "[[parameters('isNewDigestLocation')]"
+                                    },
+                                    "isPermissionAssigned": {
+                                        "value": "[[parameters('isPermissionAssigned')]"
+                                    }
+                                },
+                                "templateLink": {
+                                    "contentVersion": "1.0.0.0",
+                                    "uri": "[[parameters('sqlLedgerTemplateLink')]"
+                                }
+                            },
+                            "subscriptionId": "[[variables('subscriptionId')]",
+                            "resourceGroup": "[[ variables('resourceGroupName')]"
+                        }
+                    ],
+                    "variables": {
+                        "subscriptionId": "[[subscription().subscriptionId]",
+                        "resourceGroupName": "[[resourceGroup().name]",
+                        "uniqueStorage": "[[uniqueString(variables('subscriptionId'), variables('resourceGroupName'), parameters('location'))]",
+                        "storageName": "[[tolower(concat('sqlva', variables('uniqueStorage')))]",
+                        "privateEndpointContainerTemplateName": "[[concat('PrivateEndpointContainer-', if(parameters('enablePrivateEndpoint'), parameters('privateEndpointNestedTemplateId'), ''))]",
+                        "subnetPoliciesTemplateName": "[[concat('SubnetPolicies-', if(parameters('enablePrivateEndpoint'), parameters('privateEndpointNestedTemplateId'), ''))]",
+                        "privateEndpointTemplateName": "[[concat('PrivateEndpoint-', if(parameters('enablePrivateEndpoint'), parameters('privateEndpointNestedTemplateId'), ''))]",
+                        "deploymentTemplateApi": "2018-05-01",
+                        "privateEndpointApi": "2019-04-01",
+                        "privateEndpointId": "[[if(parameters('enablePrivateEndpoint'), resourceId(parameters('privateEndpointSubscriptionId'), parameters('privateEndpointResourceGroup'), 'Microsoft.Network/privateEndpoints', parameters('privateEndpointName')), '')]",
+                        "privateEndpointVnetId": "[[if(parameters('enablePrivateEndpoint'), resourceId(parameters('privateEndpointVnetSubscriptionId'), parameters('privateEndpointVnetResourceGroup'), 'Microsoft.Network/virtualNetworks', parameters('privateEndpointVnetName')), '')]",
+                        "privateEndpointSubnetResourceId": "[[if(parameters('enablePrivateEndpoint'), resourceId(parameters('privateEndpointVnetSubscriptionId'), parameters('privateEndpointVnetResourceGroup'), 'Microsoft.Network/virtualNetworks/subnets', parameters('privateEndpointVnetName'), parameters('privateEndpointSubnetName')), '')]",
+                        "uniqueRoleGuid": "[[guid(resourceId('Microsoft.Storage/storageAccounts', variables('storageName')), variables('storageBlobContributor'), resourceId('Microsoft.Sql/servers', parameters('serverName')))]",
+                        "StorageBlobContributor": "[[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/templateSpecs/versions",
+            "apiVersion": "2022-02-01",
+            "name": "[concat(parameters('templateSpecs_arm_web_syskit_test_italynorth_v1_name'), '/v1')]",
+            "location": "italynorth",
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/templateSpecs', parameters('templateSpecs_arm_web_syskit_test_italynorth_v1_name'))]"
+            ],
+            "properties": {
+                "mainTemplate": {
+                    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "subscriptionId": {
+                            "type": "string"
+                        },
+                        "resourceGroupName": {
+                            "type": "string"
+                        },
+                        "name": {
+                            "type": "string"
+                        },
+                        "location": {
+                            "type": "string"
+                        },
+                        "hostingPlanName": {
+                            "type": "string"
+                        },
+                        "serverFarmResourceGroup": {
+                            "type": "string"
+                        },
+                        "alwaysOn": {
+                            "type": "bool"
+                        },
+                        "ftpsState": {
+                            "type": "string"
+                        },
+                        "sku": {
+                            "type": "string"
+                        },
+                        "skuCode": {
+                            "type": "string"
+                        },
+                        "workerSize": {
+                            "type": "string"
+                        },
+                        "workerSizeId": {
+                            "type": "string"
+                        },
+                        "numberOfWorkers": {
+                            "type": "string"
+                        },
+                        "linuxFxVersion": {
+                            "type": "string"
+                        }
+                    },
+                    "variables": {},
+                    "resources": [
+                        {
+                            "apiVersion": "2022-03-01",
+                            "name": "[[parameters('name')]",
+                            "type": "Microsoft.Web/sites",
+                            "location": "[[parameters('location')]",
+                            "tags": {},
+                            "dependsOn": [
+                                "[[concat('Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]"
+                            ],
+                            "properties": {
+                                "name": "[[parameters('name')]",
+                                "siteConfig": {
+                                    "appSettings": [],
+                                    "linuxFxVersion": "[[parameters('linuxFxVersion')]",
+                                    "alwaysOn": "[[parameters('alwaysOn')]",
+                                    "ftpsState": "[[parameters('ftpsState')]"
+                                },
+                                "serverFarmId": "[[concat('/subscriptions/', parameters('subscriptionId'),'/resourcegroups/', parameters('serverFarmResourceGroup'), '/providers/Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]",
+                                "clientAffinityEnabled": false,
+                                "virtualNetworkSubnetId": null,
+                                "httpsOnly": true,
+                                "publicNetworkAccess": "Enabled"
+                            },
+                            "resources": [
+                                {
+                                    "type": "Microsoft.Web/sites/basicPublishingCredentialsPolicies",
+                                    "apiVersion": "2022-09-01",
+                                    "name": "[[concat(parameters('name'), '/scm')]",
+                                    "properties": {
+                                        "allow": false
+                                    },
+                                    "dependsOn": [
+                                        "[[resourceId('Microsoft.Web/Sites', parameters('name'))]"
+                                    ]
+                                },
+                                {
+                                    "type": "Microsoft.Web/sites/basicPublishingCredentialsPolicies",
+                                    "apiVersion": "2022-09-01",
+                                    "name": "[[concat(parameters('name'), '/ftp')]",
+                                    "properties": {
+                                        "allow": false
+                                    },
+                                    "dependsOn": [
+                                        "[[resourceId('Microsoft.Web/Sites', parameters('name'))]"
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "apiVersion": "2018-11-01",
+                            "name": "[[parameters('hostingPlanName')]",
+                            "type": "Microsoft.Web/serverfarms",
+                            "location": "[[parameters('location')]",
+                            "kind": "linux",
+                            "tags": {},
+                            "dependsOn": [],
+                            "properties": {
+                                "name": "[[parameters('hostingPlanName')]",
+                                "workerSize": "[[parameters('workerSize')]",
+                                "workerSizeId": "[[parameters('workerSizeId')]",
+                                "numberOfWorkers": "[[parameters('numberOfWorkers')]",
+                                "reserved": true,
+                                "zoneRedundant": false
+                            },
+                            "sku": {
+                                "Tier": "[[parameters('sku')]",
+                                "Name": "[[parameters('skuCode')]"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/administrators",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/ActiveDirectory')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "administratorType": "ActiveDirectory",
+                "login": "msaponja@markosaponjagmail.onmicrosoft.com",
+                "sid": "cdc63399-e259-4ec3-a065-a905f572f18e",
+                "tenantId": "4b2b0238-7a76-439b-bc3e-079b8c455cfe"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/advancedThreatProtectionSettings",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "state": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/advisors",
+            "apiVersion": "2014-04-01",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/CreateIndex')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "autoExecuteValue": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/advisors",
+            "apiVersion": "2014-04-01",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/DbParameterization')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "autoExecuteValue": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/advisors",
+            "apiVersion": "2014-04-01",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/DefragmentIndex')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "autoExecuteValue": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/advisors",
+            "apiVersion": "2014-04-01",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/DropIndex')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "autoExecuteValue": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/advisors",
+            "apiVersion": "2014-04-01",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/ForceLastGoodPlan')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "autoExecuteValue": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/auditingPolicies",
+            "apiVersion": "2014-04-01",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/Default')]",
+            "location": "Italy North",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "auditingState": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/auditingSettings",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "retentionDays": 0,
+                "auditActionsAndGroups": [],
+                "isStorageSecondaryKeyInUse": false,
+                "isAzureMonitorTargetEnabled": false,
+                "isManagedIdentityInUse": false,
+                "state": "Disabled",
+                "storageAccountSubscriptionId": "00000000-0000-0000-0000-000000000000"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/azureADOnlyAuthentications",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "azureADOnlyAuthentication": false
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/connectionPolicies",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/default')]",
+            "location": "italynorth",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "connectionType": "Default"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/sqldb-syskit-test-italynorth-1')]",
+            "location": "italynorth",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "sku": {
+                "name": "GP_S_Gen5",
+                "tier": "GeneralPurpose",
+                "family": "Gen5",
+                "capacity": 1
+            },
+            "kind": "v12.0,user,vcore,serverless",
+            "properties": {
+                "collation": "SQL_Latin1_General_CP1_CI_AS",
+                "maxSizeBytes": 34359738368,
+                "catalogCollation": "SQL_Latin1_General_CP1_CI_AS",
+                "zoneRedundant": false,
+                "readScale": "Disabled",
+                "autoPauseDelay": 60,
+                "requestedBackupStorageRedundancy": "Local",
+                "minCapacity": 0.5,
+                "maintenanceConfigurationId": "/subscriptions/85d12a1e-cb81-4755-9db9-155042ea7a3c/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default",
+                "isLedgerOn": false,
+                "availabilityZone": "NoPreference"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/sqldb-syskit-test-italynorth-2')]",
+            "location": "italynorth",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "sku": {
+                "name": "GP_S_Gen5",
+                "tier": "GeneralPurpose",
+                "family": "Gen5",
+                "capacity": 1
+            },
+            "kind": "v12.0,user,vcore,serverless",
+            "properties": {
+                "collation": "SQL_Latin1_General_CP1_CI_AS",
+                "maxSizeBytes": 34359738368,
+                "catalogCollation": "SQL_Latin1_General_CP1_CI_AS",
+                "zoneRedundant": false,
+                "readScale": "Disabled",
+                "autoPauseDelay": 60,
+                "requestedBackupStorageRedundancy": "Local",
+                "minCapacity": 0.5,
+                "maintenanceConfigurationId": "/subscriptions/85d12a1e-cb81-4755-9db9-155042ea7a3c/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default",
+                "isLedgerOn": false,
+                "availabilityZone": "NoPreference"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/sqldb-syskit-test-italynorth-3')]",
+            "location": "italynorth",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "sku": {
+                "name": "GP_S_Gen5",
+                "tier": "GeneralPurpose",
+                "family": "Gen5",
+                "capacity": 1
+            },
+            "kind": "v12.0,user,vcore,serverless",
+            "properties": {
+                "collation": "SQL_Latin1_General_CP1_CI_AS",
+                "maxSizeBytes": 34359738368,
+                "catalogCollation": "SQL_Latin1_General_CP1_CI_AS",
+                "zoneRedundant": false,
+                "readScale": "Disabled",
+                "autoPauseDelay": 60,
+                "requestedBackupStorageRedundancy": "Local",
+                "minCapacity": 0.5,
+                "maintenanceConfigurationId": "/subscriptions/85d12a1e-cb81-4755-9db9-155042ea7a3c/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default",
+                "isLedgerOn": false,
+                "availabilityZone": "NoPreference"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/advancedThreatProtectionSettings",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/master/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "state": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/auditingPolicies",
+            "apiVersion": "2014-04-01",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/master/Default')]",
+            "location": "Italy North",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "auditingState": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/auditingSettings",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/master/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "retentionDays": 0,
+                "isAzureMonitorTargetEnabled": false,
+                "state": "Disabled",
+                "storageAccountSubscriptionId": "00000000-0000-0000-0000-000000000000"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/extendedAuditingSettings",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/master/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "retentionDays": 0,
+                "isAzureMonitorTargetEnabled": false,
+                "state": "Disabled",
+                "storageAccountSubscriptionId": "00000000-0000-0000-0000-000000000000"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/geoBackupPolicies",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/master/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "state": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/ledgerDigestUploads",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/master/Current')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {}
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/securityAlertPolicies",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/master/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "state": "Disabled",
+                "disabledAlerts": [
+                    ""
+                ],
+                "emailAddresses": [
+                    ""
+                ],
+                "emailAccountAdmins": false,
+                "retentionDays": 0
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/transparentDataEncryption",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/master/Current')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "state": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/vulnerabilityAssessments",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/master/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "recurringScans": {
+                    "isEnabled": false,
+                    "emailSubscriptionAdmins": true
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/devOpsAuditingSettings",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "isAzureMonitorTargetEnabled": false,
+                "isManagedIdentityInUse": false,
+                "state": "Disabled",
+                "storageAccountSubscriptionId": "00000000-0000-0000-0000-000000000000"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/encryptionProtector",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/current')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "kind": "servicemanaged",
+            "properties": {
+                "serverKeyName": "ServiceManaged",
+                "serverKeyType": "ServiceManaged",
+                "autoRotationEnabled": false
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/extendedAuditingSettings",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "retentionDays": 0,
+                "auditActionsAndGroups": [],
+                "isStorageSecondaryKeyInUse": false,
+                "isAzureMonitorTargetEnabled": false,
+                "isManagedIdentityInUse": false,
+                "state": "Disabled",
+                "storageAccountSubscriptionId": "00000000-0000-0000-0000-000000000000"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/firewallRules",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/AllowAllWindowsAzureIps')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "startIpAddress": "0.0.0.0",
+                "endIpAddress": "0.0.0.0"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/firewallRules",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/ClientIp-2024-5-25_7-22-21')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "startIpAddress": "188.129.63.52",
+                "endIpAddress": "188.129.63.52"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/keys",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/ServiceManaged')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "kind": "servicemanaged",
+            "properties": {
+                "serverKeyType": "ServiceManaged"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/securityAlertPolicies",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "state": "Disabled",
+                "disabledAlerts": [
+                    ""
+                ],
+                "emailAddresses": [
+                    ""
+                ],
+                "emailAccountAdmins": false,
+                "retentionDays": 0
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/sqlVulnerabilityAssessments",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "state": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/vulnerabilityAssessments",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "recurringScans": {
+                    "isEnabled": false,
+                    "emailSubscriptionAdmins": true
+                },
+                "storageContainerPath": "[parameters('vulnerabilityAssessments_Default_storageContainerPath')]"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2023-12-01",
+            "name": "[parameters('sites_webapp_syskit_test_italynorth_1_name')]",
+            "location": "Italy North",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_ASP_rgsyskittestitalynorth_bbda_name'))]"
+            ],
+            "kind": "app,linux",
+            "properties": {
+                "enabled": true,
+                "hostNameSslStates": [
+                    {
+                        "name": "[concat(parameters('sites_webapp_syskit_test_italynorth_1_name'), '.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "hostType": "Standard"
+                    },
+                    {
+                        "name": "[concat(parameters('sites_webapp_syskit_test_italynorth_1_name'), '.scm.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "hostType": "Repository"
+                    }
+                ],
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_ASP_rgsyskittestitalynorth_bbda_name'))]",
+                "reserved": true,
+                "isXenon": false,
+                "hyperV": false,
+                "dnsConfiguration": {},
+                "vnetRouteAllEnabled": false,
+                "vnetImagePullEnabled": false,
+                "vnetContentShareEnabled": false,
+                "siteConfig": {
+                    "numberOfWorkers": 1,
+                    "linuxFxVersion": "PYTHON|3.12",
+                    "acrUseManagedIdentityCreds": false,
+                    "alwaysOn": false,
+                    "http20Enabled": false,
+                    "functionAppScaleLimit": 0,
+                    "minimumElasticInstanceCount": 0
+                },
+                "scmSiteAlsoStopped": false,
+                "clientAffinityEnabled": false,
+                "clientCertEnabled": false,
+                "clientCertMode": "Required",
+                "hostNamesDisabled": false,
+                "vnetBackupRestoreEnabled": false,
+                "customDomainVerificationId": "B4050873E75ABD0393E39DCD3096FB1F98BEFA2EA5D4B27459D98E6F20CB4C07",
+                "containerSize": 0,
+                "dailyMemoryTimeQuota": 0,
+                "httpsOnly": true,
+                "redundancyMode": "None",
+                "publicNetworkAccess": "Enabled",
+                "storageAccountRequired": false,
+                "keyVaultReferenceIdentity": "SystemAssigned"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2023-12-01",
+            "name": "[parameters('sites_webapp_syskit_test_italynorth_2_name')]",
+            "location": "Italy North",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_ASP_rgsyskittestitalynorth_bbda_name'))]"
+            ],
+            "kind": "app,linux",
+            "properties": {
+                "enabled": true,
+                "hostNameSslStates": [
+                    {
+                        "name": "[concat(parameters('sites_webapp_syskit_test_italynorth_2_name'), '.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "hostType": "Standard"
+                    },
+                    {
+                        "name": "[concat(parameters('sites_webapp_syskit_test_italynorth_2_name'), '.scm.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "hostType": "Repository"
+                    }
+                ],
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_ASP_rgsyskittestitalynorth_bbda_name'))]",
+                "reserved": true,
+                "isXenon": false,
+                "hyperV": false,
+                "dnsConfiguration": {},
+                "vnetRouteAllEnabled": false,
+                "vnetImagePullEnabled": false,
+                "vnetContentShareEnabled": false,
+                "siteConfig": {
+                    "numberOfWorkers": 1,
+                    "linuxFxVersion": "PYTHON|3.12",
+                    "acrUseManagedIdentityCreds": false,
+                    "alwaysOn": false,
+                    "http20Enabled": false,
+                    "functionAppScaleLimit": 0,
+                    "minimumElasticInstanceCount": 0
+                },
+                "scmSiteAlsoStopped": false,
+                "clientAffinityEnabled": false,
+                "clientCertEnabled": false,
+                "clientCertMode": "Required",
+                "hostNamesDisabled": false,
+                "vnetBackupRestoreEnabled": false,
+                "customDomainVerificationId": "B4050873E75ABD0393E39DCD3096FB1F98BEFA2EA5D4B27459D98E6F20CB4C07",
+                "containerSize": 0,
+                "dailyMemoryTimeQuota": 0,
+                "httpsOnly": true,
+                "redundancyMode": "None",
+                "publicNetworkAccess": "Enabled",
+                "storageAccountRequired": false,
+                "keyVaultReferenceIdentity": "SystemAssigned"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2023-12-01",
+            "name": "[parameters('sites_webapp_syskit_test_italynorth_3_name')]",
+            "location": "Italy North",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_ASP_rgsyskittestitalynorth_bbda_name'))]"
+            ],
+            "kind": "app,linux",
+            "properties": {
+                "enabled": true,
+                "hostNameSslStates": [
+                    {
+                        "name": "[concat(parameters('sites_webapp_syskit_test_italynorth_3_name'), '.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "hostType": "Standard"
+                    },
+                    {
+                        "name": "[concat(parameters('sites_webapp_syskit_test_italynorth_3_name'), '.scm.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "hostType": "Repository"
+                    }
+                ],
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_ASP_rgsyskittestitalynorth_bbda_name'))]",
+                "reserved": true,
+                "isXenon": false,
+                "hyperV": false,
+                "dnsConfiguration": {},
+                "vnetRouteAllEnabled": false,
+                "vnetImagePullEnabled": false,
+                "vnetContentShareEnabled": false,
+                "siteConfig": {
+                    "numberOfWorkers": 1,
+                    "linuxFxVersion": "PYTHON|3.12",
+                    "acrUseManagedIdentityCreds": false,
+                    "alwaysOn": false,
+                    "http20Enabled": false,
+                    "functionAppScaleLimit": 0,
+                    "minimumElasticInstanceCount": 0
+                },
+                "scmSiteAlsoStopped": false,
+                "clientAffinityEnabled": false,
+                "clientCertEnabled": false,
+                "clientCertMode": "Required",
+                "hostNamesDisabled": false,
+                "vnetBackupRestoreEnabled": false,
+                "customDomainVerificationId": "B4050873E75ABD0393E39DCD3096FB1F98BEFA2EA5D4B27459D98E6F20CB4C07",
+                "containerSize": 0,
+                "dailyMemoryTimeQuota": 0,
+                "httpsOnly": true,
+                "redundancyMode": "None",
+                "publicNetworkAccess": "Enabled",
+                "storageAccountRequired": false,
+                "keyVaultReferenceIdentity": "SystemAssigned"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2023-12-01",
+            "name": "[parameters('sites_webapp_syskit_test_italynorth_4_name')]",
+            "location": "Italy North",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_ASP_rgsyskittestitalynorth_bbda_name'))]"
+            ],
+            "kind": "app,linux",
+            "properties": {
+                "enabled": true,
+                "hostNameSslStates": [
+                    {
+                        "name": "[concat(parameters('sites_webapp_syskit_test_italynorth_4_name'), '.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "hostType": "Standard"
+                    },
+                    {
+                        "name": "[concat(parameters('sites_webapp_syskit_test_italynorth_4_name'), '.scm.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "hostType": "Repository"
+                    }
+                ],
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_ASP_rgsyskittestitalynorth_bbda_name'))]",
+                "reserved": true,
+                "isXenon": false,
+                "hyperV": false,
+                "dnsConfiguration": {},
+                "vnetRouteAllEnabled": false,
+                "vnetImagePullEnabled": false,
+                "vnetContentShareEnabled": false,
+                "siteConfig": {
+                    "numberOfWorkers": 1,
+                    "acrUseManagedIdentityCreds": false,
+                    "alwaysOn": false,
+                    "http20Enabled": false,
+                    "functionAppScaleLimit": 0,
+                    "minimumElasticInstanceCount": 0
+                },
+                "scmSiteAlsoStopped": false,
+                "clientAffinityEnabled": true,
+                "clientCertEnabled": false,
+                "clientCertMode": "Required",
+                "hostNamesDisabled": false,
+                "vnetBackupRestoreEnabled": false,
+                "customDomainVerificationId": "B4050873E75ABD0393E39DCD3096FB1F98BEFA2EA5D4B27459D98E6F20CB4C07",
+                "containerSize": 0,
+                "dailyMemoryTimeQuota": 0,
+                "httpsOnly": false,
+                "redundancyMode": "None",
+                "storageAccountRequired": false,
+                "keyVaultReferenceIdentity": "SystemAssigned"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/basicPublishingCredentialsPolicies",
+            "apiVersion": "2023-12-01",
+            "name": "[concat(parameters('sites_webapp_syskit_test_italynorth_1_name'), '/ftp')]",
+            "location": "Italy North",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_webapp_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "allow": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/basicPublishingCredentialsPolicies",
+            "apiVersion": "2023-12-01",
+            "name": "[concat(parameters('sites_webapp_syskit_test_italynorth_2_name'), '/ftp')]",
+            "location": "Italy North",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_webapp_syskit_test_italynorth_2_name'))]"
+            ],
+            "properties": {
+                "allow": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/basicPublishingCredentialsPolicies",
+            "apiVersion": "2023-12-01",
+            "name": "[concat(parameters('sites_webapp_syskit_test_italynorth_3_name'), '/ftp')]",
+            "location": "Italy North",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_webapp_syskit_test_italynorth_3_name'))]"
+            ],
+            "properties": {
+                "allow": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/basicPublishingCredentialsPolicies",
+            "apiVersion": "2023-12-01",
+            "name": "[concat(parameters('sites_webapp_syskit_test_italynorth_4_name'), '/ftp')]",
+            "location": "Italy North",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_webapp_syskit_test_italynorth_4_name'))]"
+            ],
+            "properties": {
+                "allow": true
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/basicPublishingCredentialsPolicies",
+            "apiVersion": "2023-12-01",
+            "name": "[concat(parameters('sites_webapp_syskit_test_italynorth_1_name'), '/scm')]",
+            "location": "Italy North",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_webapp_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "allow": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/basicPublishingCredentialsPolicies",
+            "apiVersion": "2023-12-01",
+            "name": "[concat(parameters('sites_webapp_syskit_test_italynorth_2_name'), '/scm')]",
+            "location": "Italy North",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_webapp_syskit_test_italynorth_2_name'))]"
+            ],
+            "properties": {
+                "allow": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/basicPublishingCredentialsPolicies",
+            "apiVersion": "2023-12-01",
+            "name": "[concat(parameters('sites_webapp_syskit_test_italynorth_3_name'), '/scm')]",
+            "location": "Italy North",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_webapp_syskit_test_italynorth_3_name'))]"
+            ],
+            "properties": {
+                "allow": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/basicPublishingCredentialsPolicies",
+            "apiVersion": "2023-12-01",
+            "name": "[concat(parameters('sites_webapp_syskit_test_italynorth_4_name'), '/scm')]",
+            "location": "Italy North",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_webapp_syskit_test_italynorth_4_name'))]"
+            ],
+            "properties": {
+                "allow": true
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/config",
+            "apiVersion": "2023-12-01",
+            "name": "[concat(parameters('sites_webapp_syskit_test_italynorth_1_name'), '/web')]",
+            "location": "Italy North",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_webapp_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "numberOfWorkers": 1,
+                "defaultDocuments": [
+                    "Default.htm",
+                    "Default.html",
+                    "Default.asp",
+                    "index.htm",
+                    "index.html",
+                    "iisstart.htm",
+                    "default.aspx",
+                    "index.php",
+                    "hostingstart.html"
+                ],
+                "netFrameworkVersion": "v4.0",
+                "linuxFxVersion": "PYTHON|3.12",
+                "requestTracingEnabled": false,
+                "remoteDebuggingEnabled": false,
+                "httpLoggingEnabled": false,
+                "acrUseManagedIdentityCreds": false,
+                "logsDirectorySizeLimit": 35,
+                "detailedErrorLoggingEnabled": false,
+                "publishingUsername": "$webapp-syskit-test-italynorth-1",
+                "scmType": "None",
+                "use32BitWorkerProcess": true,
+                "webSocketsEnabled": false,
+                "alwaysOn": false,
+                "managedPipelineMode": "Integrated",
+                "virtualApplications": [
+                    {
+                        "virtualPath": "/",
+                        "physicalPath": "site\\wwwroot",
+                        "preloadEnabled": false
+                    }
+                ],
+                "loadBalancing": "LeastRequests",
+                "experiments": {
+                    "rampUpRules": []
+                },
+                "autoHealEnabled": false,
+                "vnetRouteAllEnabled": false,
+                "vnetPrivatePortsCount": 0,
+                "publicNetworkAccess": "Enabled",
+                "localMySqlEnabled": false,
+                "ipSecurityRestrictions": [
+                    {
+                        "ipAddress": "Any",
+                        "action": "Allow",
+                        "priority": 2147483647,
+                        "name": "Allow all",
+                        "description": "Allow all access"
+                    }
+                ],
+                "scmIpSecurityRestrictions": [
+                    {
+                        "ipAddress": "Any",
+                        "action": "Allow",
+                        "priority": 2147483647,
+                        "name": "Allow all",
+                        "description": "Allow all access"
+                    }
+                ],
+                "scmIpSecurityRestrictionsUseMain": false,
+                "http20Enabled": false,
+                "minTlsVersion": "1.2",
+                "scmMinTlsVersion": "1.2",
+                "ftpsState": "FtpsOnly",
+                "preWarmedInstanceCount": 0,
+                "elasticWebAppScaleLimit": 0,
+                "functionsRuntimeScaleMonitoringEnabled": false,
+                "minimumElasticInstanceCount": 0,
+                "azureStorageAccounts": {}
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/config",
+            "apiVersion": "2023-12-01",
+            "name": "[concat(parameters('sites_webapp_syskit_test_italynorth_2_name'), '/web')]",
+            "location": "Italy North",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_webapp_syskit_test_italynorth_2_name'))]"
+            ],
+            "properties": {
+                "numberOfWorkers": 1,
+                "defaultDocuments": [
+                    "Default.htm",
+                    "Default.html",
+                    "Default.asp",
+                    "index.htm",
+                    "index.html",
+                    "iisstart.htm",
+                    "default.aspx",
+                    "index.php",
+                    "hostingstart.html"
+                ],
+                "netFrameworkVersion": "v4.0",
+                "linuxFxVersion": "PYTHON|3.12",
+                "requestTracingEnabled": false,
+                "remoteDebuggingEnabled": false,
+                "httpLoggingEnabled": false,
+                "acrUseManagedIdentityCreds": false,
+                "logsDirectorySizeLimit": 35,
+                "detailedErrorLoggingEnabled": false,
+                "publishingUsername": "$webapp-syskit-test-italynorth-2",
+                "scmType": "None",
+                "use32BitWorkerProcess": true,
+                "webSocketsEnabled": false,
+                "alwaysOn": false,
+                "managedPipelineMode": "Integrated",
+                "virtualApplications": [
+                    {
+                        "virtualPath": "/",
+                        "physicalPath": "site\\wwwroot",
+                        "preloadEnabled": false
+                    }
+                ],
+                "loadBalancing": "LeastRequests",
+                "experiments": {
+                    "rampUpRules": []
+                },
+                "autoHealEnabled": false,
+                "vnetRouteAllEnabled": false,
+                "vnetPrivatePortsCount": 0,
+                "publicNetworkAccess": "Enabled",
+                "localMySqlEnabled": false,
+                "ipSecurityRestrictions": [
+                    {
+                        "ipAddress": "Any",
+                        "action": "Allow",
+                        "priority": 2147483647,
+                        "name": "Allow all",
+                        "description": "Allow all access"
+                    }
+                ],
+                "scmIpSecurityRestrictions": [
+                    {
+                        "ipAddress": "Any",
+                        "action": "Allow",
+                        "priority": 2147483647,
+                        "name": "Allow all",
+                        "description": "Allow all access"
+                    }
+                ],
+                "scmIpSecurityRestrictionsUseMain": false,
+                "http20Enabled": false,
+                "minTlsVersion": "1.2",
+                "scmMinTlsVersion": "1.2",
+                "ftpsState": "FtpsOnly",
+                "preWarmedInstanceCount": 0,
+                "elasticWebAppScaleLimit": 0,
+                "functionsRuntimeScaleMonitoringEnabled": false,
+                "minimumElasticInstanceCount": 0,
+                "azureStorageAccounts": {}
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/config",
+            "apiVersion": "2023-12-01",
+            "name": "[concat(parameters('sites_webapp_syskit_test_italynorth_3_name'), '/web')]",
+            "location": "Italy North",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_webapp_syskit_test_italynorth_3_name'))]"
+            ],
+            "properties": {
+                "numberOfWorkers": 1,
+                "defaultDocuments": [
+                    "Default.htm",
+                    "Default.html",
+                    "Default.asp",
+                    "index.htm",
+                    "index.html",
+                    "iisstart.htm",
+                    "default.aspx",
+                    "index.php",
+                    "hostingstart.html"
+                ],
+                "netFrameworkVersion": "v4.0",
+                "linuxFxVersion": "PYTHON|3.12",
+                "requestTracingEnabled": false,
+                "remoteDebuggingEnabled": false,
+                "httpLoggingEnabled": false,
+                "acrUseManagedIdentityCreds": false,
+                "logsDirectorySizeLimit": 35,
+                "detailedErrorLoggingEnabled": false,
+                "publishingUsername": "$webapp-syskit-test-italynorth-3",
+                "scmType": "None",
+                "use32BitWorkerProcess": true,
+                "webSocketsEnabled": false,
+                "alwaysOn": false,
+                "managedPipelineMode": "Integrated",
+                "virtualApplications": [
+                    {
+                        "virtualPath": "/",
+                        "physicalPath": "site\\wwwroot",
+                        "preloadEnabled": false
+                    }
+                ],
+                "loadBalancing": "LeastRequests",
+                "experiments": {
+                    "rampUpRules": []
+                },
+                "autoHealEnabled": false,
+                "vnetRouteAllEnabled": false,
+                "vnetPrivatePortsCount": 0,
+                "publicNetworkAccess": "Enabled",
+                "localMySqlEnabled": false,
+                "ipSecurityRestrictions": [
+                    {
+                        "ipAddress": "Any",
+                        "action": "Allow",
+                        "priority": 2147483647,
+                        "name": "Allow all",
+                        "description": "Allow all access"
+                    }
+                ],
+                "scmIpSecurityRestrictions": [
+                    {
+                        "ipAddress": "Any",
+                        "action": "Allow",
+                        "priority": 2147483647,
+                        "name": "Allow all",
+                        "description": "Allow all access"
+                    }
+                ],
+                "scmIpSecurityRestrictionsUseMain": false,
+                "http20Enabled": false,
+                "minTlsVersion": "1.2",
+                "scmMinTlsVersion": "1.2",
+                "ftpsState": "FtpsOnly",
+                "preWarmedInstanceCount": 0,
+                "elasticWebAppScaleLimit": 0,
+                "functionsRuntimeScaleMonitoringEnabled": false,
+                "minimumElasticInstanceCount": 0,
+                "azureStorageAccounts": {}
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/config",
+            "apiVersion": "2023-12-01",
+            "name": "[concat(parameters('sites_webapp_syskit_test_italynorth_4_name'), '/web')]",
+            "location": "Italy North",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_webapp_syskit_test_italynorth_4_name'))]"
+            ],
+            "properties": {
+                "numberOfWorkers": 1,
+                "defaultDocuments": [
+                    "Default.htm",
+                    "Default.html",
+                    "Default.asp",
+                    "index.htm",
+                    "index.html",
+                    "iisstart.htm",
+                    "default.aspx",
+                    "index.php",
+                    "hostingstart.html"
+                ],
+                "netFrameworkVersion": "v4.0",
+                "requestTracingEnabled": false,
+                "remoteDebuggingEnabled": false,
+                "httpLoggingEnabled": false,
+                "acrUseManagedIdentityCreds": false,
+                "logsDirectorySizeLimit": 35,
+                "detailedErrorLoggingEnabled": false,
+                "publishingUsername": "$webapp-syskit-test-italynorth-4",
+                "scmType": "None",
+                "use32BitWorkerProcess": true,
+                "webSocketsEnabled": false,
+                "alwaysOn": false,
+                "managedPipelineMode": "Integrated",
+                "virtualApplications": [
+                    {
+                        "virtualPath": "/",
+                        "physicalPath": "site\\wwwroot",
+                        "preloadEnabled": false
+                    }
+                ],
+                "loadBalancing": "LeastRequests",
+                "experiments": {
+                    "rampUpRules": []
+                },
+                "autoHealEnabled": false,
+                "vnetRouteAllEnabled": false,
+                "vnetPrivatePortsCount": 0,
+                "localMySqlEnabled": false,
+                "ipSecurityRestrictions": [
+                    {
+                        "ipAddress": "Any",
+                        "action": "Allow",
+                        "priority": 2147483647,
+                        "name": "Allow all",
+                        "description": "Allow all access"
+                    }
+                ],
+                "scmIpSecurityRestrictions": [
+                    {
+                        "ipAddress": "Any",
+                        "action": "Allow",
+                        "priority": 2147483647,
+                        "name": "Allow all",
+                        "description": "Allow all access"
+                    }
+                ],
+                "scmIpSecurityRestrictionsUseMain": false,
+                "http20Enabled": false,
+                "minTlsVersion": "1.2",
+                "scmMinTlsVersion": "1.2",
+                "ftpsState": "FtpsOnly",
+                "preWarmedInstanceCount": 0,
+                "elasticWebAppScaleLimit": 0,
+                "functionsRuntimeScaleMonitoringEnabled": false,
+                "minimumElasticInstanceCount": 0,
+                "azureStorageAccounts": {}
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/hostNameBindings",
+            "apiVersion": "2023-12-01",
+            "name": "[concat(parameters('sites_webapp_syskit_test_italynorth_1_name'), '/', parameters('sites_webapp_syskit_test_italynorth_1_name'), '.azurewebsites.net')]",
+            "location": "Italy North",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_webapp_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "siteName": "webapp-syskit-test-italynorth-1",
+                "hostNameType": "Verified"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/hostNameBindings",
+            "apiVersion": "2023-12-01",
+            "name": "[concat(parameters('sites_webapp_syskit_test_italynorth_2_name'), '/', parameters('sites_webapp_syskit_test_italynorth_2_name'), '.azurewebsites.net')]",
+            "location": "Italy North",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_webapp_syskit_test_italynorth_2_name'))]"
+            ],
+            "properties": {
+                "siteName": "webapp-syskit-test-italynorth-2",
+                "hostNameType": "Verified"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/hostNameBindings",
+            "apiVersion": "2023-12-01",
+            "name": "[concat(parameters('sites_webapp_syskit_test_italynorth_3_name'), '/', parameters('sites_webapp_syskit_test_italynorth_3_name'), '.azurewebsites.net')]",
+            "location": "Italy North",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_webapp_syskit_test_italynorth_3_name'))]"
+            ],
+            "properties": {
+                "siteName": "webapp-syskit-test-italynorth-3",
+                "hostNameType": "Verified"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/hostNameBindings",
+            "apiVersion": "2023-12-01",
+            "name": "[concat(parameters('sites_webapp_syskit_test_italynorth_4_name'), '/', parameters('sites_webapp_syskit_test_italynorth_4_name'), '.azurewebsites.net')]",
+            "location": "Italy North",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_webapp_syskit_test_italynorth_4_name'))]"
+            ],
+            "properties": {
+                "siteName": "webapp-syskit-test-italynorth-4",
+                "hostNameType": "Verified"
+            }
+        },
+        {
+            "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+            "apiVersion": "2020-06-01",
+            "name": "[concat(parameters('privateDnsZones_privatelink_database_windows_net_name'), '/gw3jydmd3vzps')]",
+            "location": "global",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/privateDnsZones', parameters('privateDnsZones_privatelink_database_windows_net_name'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_vn_syskit_test_italynorth_name'))]"
+            ],
+            "properties": {
+                "registrationEnabled": false,
+                "virtualNetwork": {
+                    "id": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_vn_syskit_test_italynorth_name'))]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/privateEndpoints",
+            "apiVersion": "2023-11-01",
+            "name": "[parameters('privateEndpoints_pe_syskit_test_italynorth_name')]",
+            "location": "italynorth",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vn_syskit_test_italynorth_name'), 'default')]"
+            ],
+            "properties": {
+                "privateLinkServiceConnections": [
+                    {
+                        "name": "[parameters('privateEndpoints_pe_syskit_test_italynorth_name')]",
+                        "id": "[concat(resourceId('Microsoft.Network/privateEndpoints', parameters('privateEndpoints_pe_syskit_test_italynorth_name')), concat('/privateLinkServiceConnections/', parameters('privateEndpoints_pe_syskit_test_italynorth_name')))]",
+                        "properties": {
+                            "privateLinkServiceId": "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]",
+                            "groupIds": [
+                                "sqlServer"
+                            ],
+                            "privateLinkServiceConnectionState": {
+                                "status": "Approved",
+                                "description": "Auto-approved",
+                                "actionsRequired": "None"
+                            }
+                        }
+                    }
+                ],
+                "manualPrivateLinkServiceConnections": [],
+                "customNetworkInterfaceName": "[concat(parameters('privateEndpoints_pe_syskit_test_italynorth_name'), '-nic')]",
+                "subnet": {
+                    "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vn_syskit_test_italynorth_name'), 'default')]"
+                },
+                "ipConfigurations": [],
+                "customDnsConfigs": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('privateEndpoints_pe_syskit_test_italynorth_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/privateEndpoints', parameters('privateEndpoints_pe_syskit_test_italynorth_name'))]",
+                "[resourceId('Microsoft.Network/privateDnsZones', parameters('privateDnsZones_privatelink_database_windows_net_name'))]"
+            ],
+            "properties": {
+                "privateDnsZoneConfigs": [
+                    {
+                        "name": "privatelink-database-windows-net",
+                        "properties": {
+                            "privateDnsZoneId": "[resourceId('Microsoft.Network/privateDnsZones', parameters('privateDnsZones_privatelink_database_windows_net_name'))]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/advancedThreatProtectionSettings",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/sqldb-syskit-test-italynorth-1/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_sqlserver_syskit_test_italynorth_1_name'), 'sqldb-syskit-test-italynorth-1')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "state": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/advancedThreatProtectionSettings",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/sqldb-syskit-test-italynorth-2/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_sqlserver_syskit_test_italynorth_1_name'), 'sqldb-syskit-test-italynorth-2')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "state": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/advancedThreatProtectionSettings",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/sqldb-syskit-test-italynorth-3/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_sqlserver_syskit_test_italynorth_1_name'), 'sqldb-syskit-test-italynorth-3')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "state": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/auditingPolicies",
+            "apiVersion": "2014-04-01",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/sqldb-syskit-test-italynorth-1/Default')]",
+            "location": "Italy North",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_sqlserver_syskit_test_italynorth_1_name'), 'sqldb-syskit-test-italynorth-1')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "auditingState": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/auditingPolicies",
+            "apiVersion": "2014-04-01",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/sqldb-syskit-test-italynorth-2/Default')]",
+            "location": "Italy North",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_sqlserver_syskit_test_italynorth_1_name'), 'sqldb-syskit-test-italynorth-2')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "auditingState": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/auditingPolicies",
+            "apiVersion": "2014-04-01",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/sqldb-syskit-test-italynorth-3/Default')]",
+            "location": "Italy North",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_sqlserver_syskit_test_italynorth_1_name'), 'sqldb-syskit-test-italynorth-3')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "auditingState": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/auditingSettings",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/sqldb-syskit-test-italynorth-1/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_sqlserver_syskit_test_italynorth_1_name'), 'sqldb-syskit-test-italynorth-1')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "retentionDays": 0,
+                "isAzureMonitorTargetEnabled": false,
+                "state": "Disabled",
+                "storageAccountSubscriptionId": "00000000-0000-0000-0000-000000000000"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/auditingSettings",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/sqldb-syskit-test-italynorth-2/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_sqlserver_syskit_test_italynorth_1_name'), 'sqldb-syskit-test-italynorth-2')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "retentionDays": 0,
+                "isAzureMonitorTargetEnabled": false,
+                "state": "Disabled",
+                "storageAccountSubscriptionId": "00000000-0000-0000-0000-000000000000"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/auditingSettings",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/sqldb-syskit-test-italynorth-3/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_sqlserver_syskit_test_italynorth_1_name'), 'sqldb-syskit-test-italynorth-3')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "retentionDays": 0,
+                "isAzureMonitorTargetEnabled": false,
+                "state": "Disabled",
+                "storageAccountSubscriptionId": "00000000-0000-0000-0000-000000000000"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/backupLongTermRetentionPolicies",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/sqldb-syskit-test-italynorth-1/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_sqlserver_syskit_test_italynorth_1_name'), 'sqldb-syskit-test-italynorth-1')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "weeklyRetention": "PT0S",
+                "monthlyRetention": "PT0S",
+                "yearlyRetention": "PT0S",
+                "weekOfYear": 0
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/backupLongTermRetentionPolicies",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/sqldb-syskit-test-italynorth-2/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_sqlserver_syskit_test_italynorth_1_name'), 'sqldb-syskit-test-italynorth-2')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "weeklyRetention": "PT0S",
+                "monthlyRetention": "PT0S",
+                "yearlyRetention": "PT0S",
+                "weekOfYear": 0
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/backupLongTermRetentionPolicies",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/sqldb-syskit-test-italynorth-3/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_sqlserver_syskit_test_italynorth_1_name'), 'sqldb-syskit-test-italynorth-3')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "weeklyRetention": "PT0S",
+                "monthlyRetention": "PT0S",
+                "yearlyRetention": "PT0S",
+                "weekOfYear": 0
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/sqldb-syskit-test-italynorth-1/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_sqlserver_syskit_test_italynorth_1_name'), 'sqldb-syskit-test-italynorth-1')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "retentionDays": 7,
+                "diffBackupIntervalInHours": 12
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/sqldb-syskit-test-italynorth-2/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_sqlserver_syskit_test_italynorth_1_name'), 'sqldb-syskit-test-italynorth-2')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "retentionDays": 7,
+                "diffBackupIntervalInHours": 12
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/sqldb-syskit-test-italynorth-3/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_sqlserver_syskit_test_italynorth_1_name'), 'sqldb-syskit-test-italynorth-3')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "retentionDays": 7,
+                "diffBackupIntervalInHours": 12
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/extendedAuditingSettings",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/sqldb-syskit-test-italynorth-1/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_sqlserver_syskit_test_italynorth_1_name'), 'sqldb-syskit-test-italynorth-1')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "retentionDays": 0,
+                "isAzureMonitorTargetEnabled": false,
+                "state": "Disabled",
+                "storageAccountSubscriptionId": "00000000-0000-0000-0000-000000000000"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/extendedAuditingSettings",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/sqldb-syskit-test-italynorth-2/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_sqlserver_syskit_test_italynorth_1_name'), 'sqldb-syskit-test-italynorth-2')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "retentionDays": 0,
+                "isAzureMonitorTargetEnabled": false,
+                "state": "Disabled",
+                "storageAccountSubscriptionId": "00000000-0000-0000-0000-000000000000"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/extendedAuditingSettings",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/sqldb-syskit-test-italynorth-3/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_sqlserver_syskit_test_italynorth_1_name'), 'sqldb-syskit-test-italynorth-3')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "retentionDays": 0,
+                "isAzureMonitorTargetEnabled": false,
+                "state": "Disabled",
+                "storageAccountSubscriptionId": "00000000-0000-0000-0000-000000000000"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/geoBackupPolicies",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/sqldb-syskit-test-italynorth-1/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_sqlserver_syskit_test_italynorth_1_name'), 'sqldb-syskit-test-italynorth-1')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "state": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/geoBackupPolicies",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/sqldb-syskit-test-italynorth-2/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_sqlserver_syskit_test_italynorth_1_name'), 'sqldb-syskit-test-italynorth-2')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "state": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/geoBackupPolicies",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/sqldb-syskit-test-italynorth-3/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_sqlserver_syskit_test_italynorth_1_name'), 'sqldb-syskit-test-italynorth-3')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "state": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/ledgerDigestUploads",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/sqldb-syskit-test-italynorth-1/Current')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_sqlserver_syskit_test_italynorth_1_name'), 'sqldb-syskit-test-italynorth-1')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {}
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/ledgerDigestUploads",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/sqldb-syskit-test-italynorth-2/Current')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_sqlserver_syskit_test_italynorth_1_name'), 'sqldb-syskit-test-italynorth-2')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {}
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/ledgerDigestUploads",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/sqldb-syskit-test-italynorth-3/Current')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_sqlserver_syskit_test_italynorth_1_name'), 'sqldb-syskit-test-italynorth-3')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {}
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/securityAlertPolicies",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/sqldb-syskit-test-italynorth-1/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_sqlserver_syskit_test_italynorth_1_name'), 'sqldb-syskit-test-italynorth-1')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "state": "Disabled",
+                "disabledAlerts": [
+                    ""
+                ],
+                "emailAddresses": [
+                    ""
+                ],
+                "emailAccountAdmins": false,
+                "retentionDays": 0
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/securityAlertPolicies",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/sqldb-syskit-test-italynorth-2/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_sqlserver_syskit_test_italynorth_1_name'), 'sqldb-syskit-test-italynorth-2')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "state": "Disabled",
+                "disabledAlerts": [
+                    ""
+                ],
+                "emailAddresses": [
+                    ""
+                ],
+                "emailAccountAdmins": false,
+                "retentionDays": 0
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/securityAlertPolicies",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/sqldb-syskit-test-italynorth-3/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_sqlserver_syskit_test_italynorth_1_name'), 'sqldb-syskit-test-italynorth-3')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "state": "Disabled",
+                "disabledAlerts": [
+                    ""
+                ],
+                "emailAddresses": [
+                    ""
+                ],
+                "emailAccountAdmins": false,
+                "retentionDays": 0
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/transparentDataEncryption",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/sqldb-syskit-test-italynorth-1/Current')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_sqlserver_syskit_test_italynorth_1_name'), 'sqldb-syskit-test-italynorth-1')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "state": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/transparentDataEncryption",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/sqldb-syskit-test-italynorth-2/Current')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_sqlserver_syskit_test_italynorth_1_name'), 'sqldb-syskit-test-italynorth-2')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "state": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/transparentDataEncryption",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/sqldb-syskit-test-italynorth-3/Current')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_sqlserver_syskit_test_italynorth_1_name'), 'sqldb-syskit-test-italynorth-3')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "state": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/vulnerabilityAssessments",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/sqldb-syskit-test-italynorth-1/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_sqlserver_syskit_test_italynorth_1_name'), 'sqldb-syskit-test-italynorth-1')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "recurringScans": {
+                    "isEnabled": false,
+                    "emailSubscriptionAdmins": true
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/vulnerabilityAssessments",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/sqldb-syskit-test-italynorth-2/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_sqlserver_syskit_test_italynorth_1_name'), 'sqldb-syskit-test-italynorth-2')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "recurringScans": {
+                    "isEnabled": false,
+                    "emailSubscriptionAdmins": true
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/vulnerabilityAssessments",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/sqldb-syskit-test-italynorth-3/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_sqlserver_syskit_test_italynorth_1_name'), 'sqldb-syskit-test-italynorth-3')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]"
+            ],
+            "properties": {
+                "recurringScans": {
+                    "isEnabled": false,
+                    "emailSubscriptionAdmins": true
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/privateEndpointConnections",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/pe-syskit-test-italynorth-db304231-6f6e-4ece-98c8-9e2bf9f3de42')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]",
+                "[resourceId('Microsoft.Network/privateEndpoints', parameters('privateEndpoints_pe_syskit_test_italynorth_name'))]"
+            ],
+            "properties": {
+                "privateEndpoint": {
+                    "id": "[resourceId('Microsoft.Network/privateEndpoints', parameters('privateEndpoints_pe_syskit_test_italynorth_name'))]"
+                },
+                "privateLinkServiceConnectionState": {
+                    "status": "Approved",
+                    "description": "Auto-approved"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/virtualNetworkRules",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[concat(parameters('servers_sqlserver_syskit_test_italynorth_1_name'), '/VnetRule1SQLvm-syskit-test')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_sqlserver_syskit_test_italynorth_1_name'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vn_syskit_test_italynorth_name'), 'default')]"
+            ],
+            "properties": {
+                "virtualNetworkSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vn_syskit_test_italynorth_name'), 'default')]",
+                "ignoreMissingVnetServiceEndpoint": false
+            }
+        }
+    ]
+}

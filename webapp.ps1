@@ -1,0 +1,1 @@
+New-AzWebApp -ResourceGroupName rg-syskit-test-italynorth -Name "webapp-syskit-test-italynorth-4" -Location "Italy North" -AppServicePlan "ASP-rgsyskittestitalynorth-bbda"
